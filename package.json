@@ -1,11 +1,11 @@
 {
-  "name": "chrome-extension-boilerplate-react",
+  "name": "chrome-cart",
   "version": "2.1.0",
-  "description": "A chrome extension boilerplate built with React 16 and Webpack 4",
+  "description": "A chrome extension that implements a chrome cart for information collection",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/lxieyang/chrome-extension-boilerplate-react.git"
+    "url": "https://github.com/crystaltlin/chrome-extension-boilerplate-react.git"
   },
   "scripts": {
     "build": "node utils/build.js",
