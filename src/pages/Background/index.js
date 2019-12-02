@@ -5,24 +5,38 @@ console.log('This is the background page.');
 console.log('Put the background scripts here.');
 
 chrome.contextMenus.create({ 
-  id: 'ImageFetcher',
-  title: 'Add image to cart',
+  id: 'husky',
+  title: 'husky',
+  contexts: ['image']
+});
+
+chrome.contextMenus.create({ 
+  id: 'samoyed',
+  title: 'samoyed',
   contexts: ['image']
 });
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
     chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
-        console.log("send message")
+        console.log("send message", info.menuItemId, tab)
         console.log(tabs[0])
-        chrome.tabs.sendMessage(tabs[0].id, {type: 'getImage', url: info.srcUrl});
+        chrome.tabs.sendMessage(tabs[0].id, {type: 'getImage', cart: info.menuItemId, url: info.srcUrl});
     });
 });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log("receive message")
-  if (request.type === 'popup') {
-      console.log("from popup!!!")
-      console.log(request, sender)
+  if (request.type === 'updateMenu') {
+      console.log("update Menu")
+      console.log(request.menu)
+      chrome.contextMenus.removeAll()
+      for (var index = 0; index < request.menu.length; index++) { 
+            chrome.contextMenus.create({ 
+              id: request.menu[index],
+              title: request.menu[index],
+              contexts: ['image']
+            });
+} 
   }
 });
 

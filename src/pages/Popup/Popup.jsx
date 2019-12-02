@@ -19,7 +19,10 @@ function cartImage(url, i, deleteme)  {
 
 class Popup extends Component {    
   state = {
-    imageURLs : []
+    imageURLs : {},
+    tabs : [],
+    activeTab : undefined,
+    inputValue: 'enter name',
   };
 
   
@@ -29,14 +32,21 @@ class Popup extends Component {
   if (request.type === 'getImage') {
       console.log("get image!!!")
       console.log(request)
-      let newURLs = [...this.state.imageURLs];
-    newURLs.push(request.url);
+      let newURLs = this.state.imageURLs[request.cart];
+      let newTotalURLs = this.state.imageURLs
+    if (newURLs) {
+        newURLs.push(request.url);
+    } else {
+        newURLs = [request.url];
+    }
+    newTotalURLs[request.cart] = newURLs
     this.setState({
-      imageURLs: newURLs,
+      imageURLs: newTotalURLs,
+      activeTab: request.cart
     });
-    console.log(newURLs)
-    localStorage.setItem('imageURLs', JSON.stringify(newURLs))
-
+    localStorage.setItem('imageURLs', JSON.stringify(newTotalURLs))
+    localStorage.setItem('activeTab', request.cart)
+    console.log("get", localStorage.getItem('imageURLs'))
   }
 });
 
@@ -48,45 +58,148 @@ class Popup extends Component {
             imageURLs: URLs,
         });
     }
+    if (localStorage.getItem("tabs") !== null) {
+        let tabs = JSON.parse(localStorage.getItem("tabs"));
+        this.setState({
+            tabs: tabs,
+        });
+    }
+    console.log(localStorage)
+    if (localStorage.getItem("activeTab") !== null) {
+        let activeTab = localStorage.getItem("activeTab");
+        this.setState({
+            activeTab: activeTab,
+        });
+    }
 
     }
 
-    deletePersonClickedHandler = idx => {
+
+    deleteImage = idx => {
     console.log('should delete', idx);
-    let newURLs = [...this.state.imageURLs];
+    let newURLs = [...this.state.imageURLs[this.state.activeTab]];
     newURLs.splice(idx, 1);
+    let newTotalURLs = this.state.imageURLs
+    newTotalURLs[this.state.activeTab] = newURLs
     this.setState({
-      imageURLs: newURLs,
+      imageURLs: newTotalURLs,
     });
-    localStorage.setItem("imageURLs", JSON.stringify(newURLs))
+    localStorage.setItem("imageURLs", JSON.stringify(newTotalURLs))
   };
 
+  newTab = activeTab =>  {
+  this.setState({
+          activeTab: activeTab,
+        });
+    localStorage.setItem('activeTab', activeTab)
+  if (activeTab === "Add") {
+      let newTabs = [...this.state.tabs];
+        newTabs.push("untitled");
+        this.setState({
+          tabs: newTabs,
+          activeTab: newTabs[newTabs.length-1]
+        });
+        localStorage.setItem("tabs", JSON.stringify(newTabs))
+        localStorage.setItem('activeTab', newTabs[newTabs.length-1])
+
+    }
+  }
+
+  deleteCart = idx => {
+  console.log("delete cart", idx)
+  let newTotalURLs = this.state.imageURLs
+    newTotalURLs[this.state.tabs[idx]] = undefined
+  let newTabs = [...this.state.tabs];
+    newTabs.splice(idx, 1);
+    this.setState({
+      tabs: newTabs,
+      activeTab : newTabs[0],
+      imageURLs: newTotalURLs
+    });
+    localStorage.setItem("imageURLs", JSON.stringify(newTotalURLs))
+    localStorage.setItem("tabs", JSON.stringify(newTabs))
+    localStorage.setItem('activeTab', newTabs[0])
+
+  }
+
+  changeCartName = (idx, newName) => {
+  console.log("change cart name", idx, newName)
+  let oldName = this.state.tabs[idx]
+  let newTotalURLs = this.state.imageURLs
+    newTotalURLs[newName] = this.state.imageURLs[oldName]
+    newTotalURLs[oldName] = undefined
+  let newTabs = [...this.state.tabs];
+    newTabs[idx] = newName;
+    this.setState({
+      tabs: newTabs,
+      imageURLs: newTotalURLs,
+      activeTab: newName,
+      inputValue: "enter name"
+    });
+    localStorage.setItem("imageURLs", JSON.stringify(newTotalURLs))
+    localStorage.setItem("tabs", JSON.stringify(newTabs))
+    localStorage.setItem('activeTab', newName)
+
+  }
+
+  inputName = (idx, e) => {
+  this.setState({
+    inputValue: e.target.value,
+  })
+  }
+
+  updateMenu = () => {
+  console.log("update menu")
+    chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
+        chrome.tabs.sendMessage(tabs[0].id, {type: 'updateMenu', menu: this.state.tabs});
+    })
+  }
 
 
   render() {
     return (
       <div>
         <div>
-          <Tabs defaultActiveKey="home" id="uncontrolled-tab-example">
-            <Tab eventKey="home" title="Home" >
-              <div className="cart">
+          <Tabs activeKey={this.state.activeTab} id="uncontrolled-tab-example" onSelect={e => this.newTab(e)}>
+            
+            {this.state.tabs.map((tab, idx) => {
+            if (this.state.imageURLs[tab]){
+            return (
+                <Tab eventKey={tab} title={tab}>
+                <div className="cart">
                 <div>
-                  {this.state.imageURLs.map((url, idx) => {
+                  {this.state.imageURLs[tab].map((url, idx) => {
                     return (
-                      cartImage(url, idx, this.deletePersonClickedHandler)
+                      cartImage(url, idx, this.deleteImage)
                     );
                   })}
                 </div>
                 
               </div>
-            </Tab>
-            <Tab eventKey="profile" title="Profile">
-            </Tab>
-            <Tab eventKey="Add" title="+">
+                <Button onClick={() => this.updateMenu()}>View Cart</Button>
+                <Button onClick={() => this.deleteCart(idx)}>Delete Cart</Button>
+              <Button onClick={() => this.changeCartName(idx,this.state.inputValue)}>Change Cart Name</Button>
+              <input type="text" value={this.state.inputValue} onChange={e => this.inputName(idx, e)} />
+                </Tab>
+            );
+            } else {
+            return (
+            <Tab eventKey={tab} title={tab}>
+            <Button>View Cart</Button>
+                <Button onClick={() => this.deleteCart(idx)}>Delete Cart</Button>
+              <Button onClick={() => this.changeCartName(idx,this.state.inputValue)}>Change Cart Name</Button>
+              <input type="text" value={this.state.inputValue} onChange={e => this.inputName(idx, e)} />
+                </Tab>
+            );
+            }
+
+            })}
+            
+            <Tab eventKey="Add" title="+" onSelect={() => this.newTab(0)}>
             </Tab>
           </Tabs>
         </div>
-        <Button>View Cart</Button>
+        
       </div>
     );
   }
