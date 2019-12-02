@@ -10,6 +10,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       console.log("get image!!!")
       console.log(request, sender)
       chrome.storage.local.set({url: request.url});
+      chrome.runtime.sendMessage(request.id, {type: 'getImage', url: request.url});
   }
 });
 

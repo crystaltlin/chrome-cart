@@ -7,14 +7,14 @@ console.log('Put the background scripts here.');
 chrome.contextMenus.create({ 
   id: 'ImageFetcher',
   title: 'Add image to cart',
-  contexts: ['all']
+  contexts: ['image']
 });
 
-chrome.contextMenus.onClicked.addListener(() => {
-    console.log("clicked", chrome.tabs)
+chrome.contextMenus.onClicked.addListener((info, tab) => {
     chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
         console.log("send message")
-        chrome.tabs.sendMessage(tabs[0].id, {type: 'getImage', url: tabs[0].url});
+        console.log(tabs[0])
+        chrome.tabs.sendMessage(tabs[0].id, {type: 'getImage', url: info.srcUrl});
     });
 });
 
@@ -26,29 +26,3 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-// chrome.runtime.onInstalled.addListener(() => {
-//   console.log('onInstalled...');
-//   // create alarm after extension is installed / upgraded
-//   chrome.alarms.create('refresh', { periodInMinutes: 5 });
-// });
-
-// chrome.alarms.onAlarm.addListener((alarm) => {
-//   console.log(alarm.name); // refresh
-//   helloWorld();
-// });
-
-// function helloWorld() {
-//   console.log("Hello, world!");
-//   startRequest();
-// }
-
-// async function startRequest() {
-//   console.log(chrome.tabs);
-// }
-
-
-// chrome.runtime.onMessage.addListener(request => {
-//   if (request.type === 'getHeadlines') {
-//       console.log("request!")
-//   }
-// });

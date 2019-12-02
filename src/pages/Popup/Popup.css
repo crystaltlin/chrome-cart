@@ -4,3 +4,14 @@
     margin: 10px;
 }
 
+.cartImage {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+}
+
+.deleteImage {
+    width: 10px;
+    height: 10px;
+    object-fit: cover;
+}
