@@ -33,12 +33,13 @@ class Newtab extends Component {
     localStorage.setItem('activeTab', request.cart)
     console.log("get", localStorage.getItem('imageURLs'))
   } 
-  if (request.type === 'getCart'){
-    console.log("get cart")
-    console.log(request.state)
+  if (request.type === 'cartInfo'){
+    console.log("get cart info")
+    console.log(request.cart, request.state)
     this.setState(
     {
-      imageURLs :  request.state
+      imageURLs :  request.state,
+      cart: request.cart
     }
    )
    console.log("state", this.state)
@@ -54,7 +55,7 @@ class Newtab extends Component {
     console.log(this.state)
     return (
       <div className="NewtabContainer">
-        <p>This is the new tab page.</p>
+        <p>{this.state.cart}</p>
         {this.state.imageURLs.map((url, idx) => {
                     return (
                       <img src={url} />

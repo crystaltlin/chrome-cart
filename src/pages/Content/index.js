@@ -47,9 +47,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     chrome.runtime.sendMessage(request.id, {type: 'updateMenu', menu: request.menu});
   }
-  if (request.type === 'getCart') {
-    console.log("get cart!!!")
-    chrome.runtime.sendMessage(request.id, {type: 'getCart', menu: request.menu});
+  if (request.type === 'viewCart') {
+    console.log("view cart!!!")
+    chrome.runtime.sendMessage(request.id, {type: 'viewCart', cart: request.cart, imageURLs : request.imageURLs});
   }
 });
 

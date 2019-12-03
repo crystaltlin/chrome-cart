@@ -181,14 +181,13 @@ class Popup extends Component {
   viewCart = idx => {
   console.log("view cart")
   console.log(this.state.imageURLs, this.state.tabs[idx])
+  var cart = this.state.tabs[idx]
   var imageURLs = this.state.imageURLs[this.state.tabs[idx]]
-    chrome.tabs.create({ url: 'newtab.html' }, function(tab) {
-     
-        chrome.tabs.executeScript(tab.id, {file:"contentScript.bundle.js"}, function() {
-          chrome.tabs.sendMessage(tab.id, {type: "getCart", state : imageURLs});
-        });
-
+  chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
+        chrome.tabs.sendMessage(tabs[0].id, {type: 'viewCart', cart: cart, imageURLs : imageURLs});
     })
+    
+
   }
 
   render() {

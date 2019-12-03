@@ -48,5 +48,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 } 
  chrome.storage.sync.set({'bgmenu': request.menu})
   }
+
+  if (request.type === 'viewCart') {
+        chrome.tabs.create({ url: 'newtab.html' }, function(tab) {     
+        chrome.tabs.executeScript(tab.id, {file:"contentScript.bundle.js"}, function() {
+          chrome.tabs.sendMessage(tab.id, {type: "cartInfo", cart: request.cart, state : request.imageURLs});
+        });
+
+  })
+  }
 });
 
