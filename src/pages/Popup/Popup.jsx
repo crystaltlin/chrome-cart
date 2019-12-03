@@ -178,6 +178,18 @@ class Popup extends Component {
     })
   }
 
+  viewCart = idx => {
+  console.log("view cart")
+  console.log(this.state.imageURLs, this.state.tabs[idx])
+  var imageURLs = this.state.imageURLs[this.state.tabs[idx]]
+    chrome.tabs.create({ url: 'newtab.html' }, function(tab) {
+     
+        chrome.tabs.executeScript(tab.id, {file:"contentScript.bundle.js"}, function() {
+          chrome.tabs.sendMessage(tab.id, {type: "getCart", state : imageURLs});
+        });
+
+    })
+  }
 
   render() {
     return (
@@ -189,6 +201,10 @@ class Popup extends Component {
             if (this.state.imageURLs[tab]){
             return (
                 <Tab eventKey={tab} title={tab}>
+                <Button onClick={() => this.viewCart(idx)}>View Cart</Button>
+                <Button onClick={() => this.deleteCart(idx)}>Delete Cart</Button>
+              <Button onClick={() => this.changeCartName(idx,this.state.inputValue)}>Change Cart Name</Button>
+              <input type="text" value={this.state.inputValue} onChange={e => this.inputName(idx, e)} />
                 <div className="cart">
                 <div>
                   {this.state.imageURLs[tab].map((url, idx) => {
@@ -199,10 +215,6 @@ class Popup extends Component {
                 </div>
                 
               </div>
-                <Button onClick={() => this.updateMenu()}>View Cart</Button>
-                <Button onClick={() => this.deleteCart(idx)}>Delete Cart</Button>
-              <Button onClick={() => this.changeCartName(idx,this.state.inputValue)}>Change Cart Name</Button>
-              <input type="text" value={this.state.inputValue} onChange={e => this.inputName(idx, e)} />
                 </Tab>
             );
             } else {

@@ -5,32 +5,62 @@ class Newtab extends Component {
   state = {
     reactVersion: '16.10',
     webpackVersion: '4',
+    imageURLs : []
   };
+
+  componentDidMount(){
+
+  console.log("send getCart")
+  chrome.runtime.sendMessage("aaankadkkoepbdabimmlnojjkjclimcg", {type: "getCart"})
+
+  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.type === 'getImage') { 
+      console.log("get image!!!")
+      console.log(request)
+      let newURLs = this.state.imageURLs[request.cart];
+      let newTotalURLs = this.state.imageURLs
+    if (newURLs) {
+        newURLs.push(request.url);
+    } else {
+        newURLs = [request.url];
+    }
+    newTotalURLs[request.cart] = newURLs
+    this.setState({
+      imageURLs: newTotalURLs,
+      activeTab: request.cart
+    });
+    localStorage.setItem('imageURLs', JSON.stringify(newTotalURLs))
+    localStorage.setItem('activeTab', request.cart)
+    console.log("get", localStorage.getItem('imageURLs'))
+  } 
+  if (request.type === 'getCart'){
+    console.log("get cart")
+    console.log(request.state)
+    this.setState(
+    {
+      imageURLs :  request.state
+    }
+   )
+   console.log("state", this.state)
+  }
+    
+  });
+
+  }
+
+
   render() {
     const { reactVersion, webpackVersion } = this.state;
-
+    console.log(this.state)
     return (
       <div className="NewtabContainer">
         <p>This is the new tab page.</p>
-        <p>
-          It uses{' '}
-          <a
-            href="https://reactjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React {reactVersion}
-          </a>{' '}
-          and{' '}
-          <a
-            href="https://webpack.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Webpack {webpackVersion}
-          </a>
-          .
-        </p>
+        {this.state.imageURLs.map((url, idx) => {
+                    return (
+                      <img src={url} />
+                    );
+                  })}
+        
       </div>
     );
   }
