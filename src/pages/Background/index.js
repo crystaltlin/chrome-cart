@@ -4,17 +4,26 @@ import '../../assets/img/cart-icon.png';
 console.log('This is the background page.');
 console.log('Put the background scripts here.');
 
-chrome.contextMenus.create({ 
-  id: 'husky',
-  title: 'husky',
-  contexts: ['image']
+chrome.storage.sync.get(['bgmenu'], function(result){
+    var menu = result['bgmenu']
+    chrome.contextMenus.removeAll()
+    if (!menu) {
+        console.log("cannot find menu")
+        return
+    } else {
+        console.log("menu", menu)
+    }
+    for (var index = 0; index < menu.length; index++) { 
+        chrome.contextMenus.create({ 
+          id: menu[index],
+          title: menu[index],
+          contexts: ['image']
+        });
+    }
 });
 
-chrome.contextMenus.create({ 
-  id: 'samoyed',
-  title: 'samoyed',
-  contexts: ['image']
-});
+
+
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
     chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
@@ -37,6 +46,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
               contexts: ['image']
             });
 } 
+ chrome.storage.sync.set({'bgmenu': request.menu})
   }
 });
 

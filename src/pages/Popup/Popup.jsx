@@ -28,8 +28,32 @@ class Popup extends Component {
   
   
   componentDidMount() {
+
+  chrome.storage.local.get('imageURLs', function(result){
+        if (result['imageURLs']){
+            console.log("imageURLs from content")
+            this.setState({
+            imageURLs: result['imageURLs'],
+            });
+            console.log(result['imageURLs'])
+        } else {
+            console.log("imageURLs from localStorage")
+            if (localStorage.getItem("imageURLs") !== null) {
+                let URLs = JSON.parse(localStorage.getItem("imageURLs"));
+                console.log(URLs)
+                this.setState({
+                    imageURLs: URLs,
+                });
+                chrome.storage.local.set({'imageURLs': URLs});
+
+            }
+        }
+    }.bind(this));
+    
+
+
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.type === 'getImage') {
+  if (request.type === 'getImage') { 
       console.log("get image!!!")
       console.log(request)
       let newURLs = this.state.imageURLs[request.cart];
@@ -47,17 +71,13 @@ class Popup extends Component {
     localStorage.setItem('imageURLs', JSON.stringify(newTotalURLs))
     localStorage.setItem('activeTab', request.cart)
     console.log("get", localStorage.getItem('imageURLs'))
-  }
-});
+  } 
+    
+  });
+
 
   
-    if (localStorage.getItem("imageURLs") !== null) {
-        let URLs = JSON.parse(localStorage.getItem("imageURLs"));
-        console.log(URLs)
-        this.setState({
-            imageURLs: URLs,
-        });
-    }
+    
     if (localStorage.getItem("tabs") !== null) {
         let tabs = JSON.parse(localStorage.getItem("tabs"));
         this.setState({
@@ -72,12 +92,12 @@ class Popup extends Component {
         });
     }
 
-    }
+}    
 
 
     deleteImage = idx => {
     console.log('should delete', idx);
-    let newURLs = [...this.state.imageURLs[this.state.activeTab]];
+    let newURLs = this.state.imageURLs[this.state.activeTab];
     newURLs.splice(idx, 1);
     let newTotalURLs = this.state.imageURLs
     newTotalURLs[this.state.activeTab] = newURLs
@@ -85,6 +105,7 @@ class Popup extends Component {
       imageURLs: newTotalURLs,
     });
     localStorage.setItem("imageURLs", JSON.stringify(newTotalURLs))
+    chrome.storage.local.set({'imageURLs': newTotalURLs})
   };
 
   newTab = activeTab =>  {
@@ -101,8 +122,10 @@ class Popup extends Component {
         });
         localStorage.setItem("tabs", JSON.stringify(newTabs))
         localStorage.setItem('activeTab', newTabs[newTabs.length-1])
+        this.updateMenu();
 
     }
+
   }
 
   deleteCart = idx => {
@@ -119,7 +142,7 @@ class Popup extends Component {
     localStorage.setItem("imageURLs", JSON.stringify(newTotalURLs))
     localStorage.setItem("tabs", JSON.stringify(newTabs))
     localStorage.setItem('activeTab', newTabs[0])
-
+    this.updateMenu();
   }
 
   changeCartName = (idx, newName) => {
@@ -139,7 +162,7 @@ class Popup extends Component {
     localStorage.setItem("imageURLs", JSON.stringify(newTotalURLs))
     localStorage.setItem("tabs", JSON.stringify(newTabs))
     localStorage.setItem('activeTab', newName)
-
+    this.updateMenu();
   }
 
   inputName = (idx, e) => {
