@@ -1,17 +1,62 @@
 .cart{
     height: 500px;
     overflow-y: scroll;
-    margin: 10px;
+    padding: 10px;
 }
 
 .cartImage {
-    width: 100px;
-    height: 100px;
+    width: 188px;
     object-fit: cover;
+    margin-left: 1px;
+    margin-right: 1px;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    border-radius: 5%;
 }
 
 .deleteImage {
-    width: 10px;
-    height: 10px;
-    object-fit: cover;
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    
+}
+
+.cartItem {
+    position: relative;
+    display: inline-block;
+}
+
+button {
+    margin: 2px;
+    margin-bottom: 10px;
+    font-size: 10px;
+}
+
+input {
+    width: 150px;
+    font-size: 12px;
+}
+
+.nav-item {
+    font-size: 12px;
+    font-weight: bold;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+
+}
+
+
+.nav-tabs .nav-item.show .nav-link.active{
+    color: #007bff;
+}
+
+
+.row {
+    position: relative;
+    left: 15px;
 }

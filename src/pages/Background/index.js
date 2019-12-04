@@ -51,11 +51,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   if (request.type === 'viewCart') {
         chrome.tabs.create({ url: 'newtab.html' }, function(tab) {     
-        chrome.tabs.executeScript(tab.id, {file:"contentScript.bundle.js"}, function() {
-          chrome.tabs.sendMessage(tab.id, {type: "cartInfo", cart: request.cart, state : request.imageURLs});
-        });
-
-  })
+        setTimeout(() => {
+        chrome.tabs.sendMessage(tab.id, {type: "cartInfo", cart: request.cart, state : request.imageURLs});
+       
+    }, 1000);
+    });
   }
 });
 

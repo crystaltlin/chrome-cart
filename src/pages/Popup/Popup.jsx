@@ -7,9 +7,8 @@ import {Bootstrap, Grid, Row, Col, Tabs, Tab, Nav, Button} from 'react-bootstrap
 
 function cartImage(url, i, deleteme)  {
   return (
-    <div>
-      <h3>{i}</h3>
-      <img className="deleteImage" src="https://cdn3.iconfinder.com/data/icons/ui-essential-elements-dark-buttons/110/DeleteDustbin-512.png"
+    <div className="cartItem">
+      <img className="deleteImage" src="http://files.softicons.com/download/toolbar-icons/flatastic-icons-part-1-by-custom-icon-design/png/256x256/delete1.png"
        onClick={() => deleteme(i)}/>
       <img className="cartImage" src={url}/>
     </div>
@@ -22,7 +21,7 @@ class Popup extends Component {
     imageURLs : {},
     tabs : [],
     activeTab : undefined,
-    inputValue: 'enter name',
+    inputValue: '',
   };
 
   
@@ -157,11 +156,12 @@ class Popup extends Component {
       tabs: newTabs,
       imageURLs: newTotalURLs,
       activeTab: newName,
-      inputValue: "enter name"
+      inputValue: ""
     });
     localStorage.setItem("imageURLs", JSON.stringify(newTotalURLs))
     localStorage.setItem("tabs", JSON.stringify(newTabs))
     localStorage.setItem('activeTab', newName)
+    chrome.storage.local.set({'imageURLs': newTotalURLs})
     this.updateMenu();
   }
 
@@ -198,32 +198,49 @@ class Popup extends Component {
             
             {this.state.tabs.map((tab, idx) => {
             if (this.state.imageURLs[tab]){
-            return (
-                <Tab eventKey={tab} title={tab}>
-                <Button onClick={() => this.viewCart(idx)}>View Cart</Button>
-                <Button onClick={() => this.deleteCart(idx)}>Delete Cart</Button>
-              <Button onClick={() => this.changeCartName(idx,this.state.inputValue)}>Change Cart Name</Button>
-              <input type="text" value={this.state.inputValue} onChange={e => this.inputName(idx, e)} />
-                <div className="cart">
-                <div>
-                  {this.state.imageURLs[tab].map((url, idx) => {
-                    return (
-                      cartImage(url, idx, this.deleteImage)
-                    );
-                  })}
+                return (
+
+                    <Tab eventKey={tab} title={tab}>
+                    <div className="cart">
+                        <Button size='sm' onClick={() => this.viewCart(idx)}>View</Button>
+                        <Button size='sm' onClick={() => this.deleteCart(idx)}>Delete</Button>
+                        <Button size='sm' onClick={() => this.changeCartName(idx,this.state.inputValue)}>Rename</Button>
+                        <input type="text" placeholder = "new name" value={this.state.inputValue} onChange={e => this.inputName(idx, e)} />
+                        
+                        <div className="row">
+                            <div className="column">
+                            {this.state.imageURLs[tab].map((url, idx) => {
+                                if (idx % 2 === 0) {
+                                    return (
+                                          <div>{cartImage(url, idx, this.deleteImage)}</div>
+                                    );
+                                } 
+                            })}
+                            </div>
+                            <div className="column">
+                            {this.state.imageURLs[tab].map((url, idx) => {
+                                if (idx % 2 === 1) {
+                                    return (
+                                          <div>{cartImage(url, idx, this.deleteImage)}</div>
+                                    );
+                                } 
+                            })}
+                            </div>
+                    </div>
+                        
                 </div>
-                
-              </div>
                 </Tab>
-            );
+                );
             } else {
             return (
             <Tab eventKey={tab} title={tab}>
-            <Button>View Cart</Button>
-                <Button onClick={() => this.deleteCart(idx)}>Delete Cart</Button>
-              <Button onClick={() => this.changeCartName(idx,this.state.inputValue)}>Change Cart Name</Button>
-              <input type="text" value={this.state.inputValue} onChange={e => this.inputName(idx, e)} />
-                </Tab>
+            <div className="cart">
+                <Button size='sm' onClick={() => this.viewCart(idx)}>View</Button>
+                <Button size='sm' onClick={() => this.deleteCart(idx)}>Delete</Button>
+                <Button size='sm' onClick={() => this.changeCartName(idx,this.state.inputValue)}>Rename</Button>
+                <input type="text" placeholder = "new name" value={this.state.inputValue} onChange={e => this.inputName(idx, e)} />
+            </div>
+            </Tab>
             );
             }
 

@@ -1,8 +1,7 @@
 {
   "name": "Chrome Cart",
   "options_page": "options.html",
-  "permissions": ["alarms", "contextMenus", "tabs", "activeTab", "storage", 
-    "chrome-extension://aaankadkkoepbdabimmlnojjkjclimcg/newtab.html"],
+  "permissions": ["alarms", "contextMenus", "tabs", "activeTab", "storage"],
   "background": {
     "page": "background.html",
     "persistent": true
