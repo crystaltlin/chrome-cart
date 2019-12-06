@@ -5,24 +5,15 @@ console.log('Must reload extension for modifications to take effect.');
 
 printLine('Using a function from the Print Module');
 
-chrome.storage.local.get(['imageURLs'], function(result){
-        console.log(result);
-    });
-
-
-
 
 
 
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    console.log("get imageURL", request)
-    chrome.storage.local.get(['imageURLs'], function(result){
-        console.log("result", result);
-    });
+
+
   if (request.type === 'getImage') {
-      console.log("get image!!!")
-      console.log(request, sender)
+
 
       chrome.storage.local.get(['imageURLs'], function(result){
         var newTotalURLs = result['imageURLs']
@@ -43,12 +34,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       chrome.runtime.sendMessage(request.id, {type: 'getImage', url: request.url, cart: request.cart});
   }
   if (request.type === "updateMenu") {
-    console.log("update menu!!!", request.menu)
-
     chrome.runtime.sendMessage(request.id, {type: 'updateMenu', menu: request.menu});
   }
   if (request.type === 'viewCart') {
-    console.log("view cart!!!")
     chrome.runtime.sendMessage(request.id, {type: 'viewCart', cart: request.cart, imageURLs : request.imageURLs});
   }
 });

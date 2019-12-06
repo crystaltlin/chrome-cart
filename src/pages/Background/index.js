@@ -10,8 +10,6 @@ chrome.storage.sync.get(['bgmenu'], function(result){
     if (!menu) {
         console.log("cannot find menu")
         return
-    } else {
-        console.log("menu", menu)
     }
     for (var index = 0; index < menu.length; index++) { 
         chrome.contextMenus.create({ 
@@ -27,17 +25,15 @@ chrome.storage.sync.get(['bgmenu'], function(result){
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
     chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
-        console.log("send message", info.menuItemId, tab)
-        console.log(tabs[0])
+
         chrome.tabs.sendMessage(tabs[0].id, {type: 'getImage', cart: info.menuItemId, url: info.srcUrl});
     });
 });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    console.log("receive message")
+
   if (request.type === 'updateMenu') {
-      console.log("update Menu")
-      console.log(request.menu)
+
       chrome.contextMenus.removeAll()
       for (var index = 0; index < request.menu.length; index++) { 
             chrome.contextMenus.create({ 
