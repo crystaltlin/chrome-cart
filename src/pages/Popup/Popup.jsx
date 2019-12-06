@@ -18,7 +18,8 @@ function cartImage(url, i, deleteme)  {
 };
 
 
-class Popup extends Component {    
+class Popup extends Component {   
+
   state = {
     imageURLs : {},
     tabs : [],
@@ -27,54 +28,48 @@ class Popup extends Component {
     images : []
   };
 
-  
-  
+
   componentDidMount() {
 
-  chrome.storage.local.get('imageURLs', function(result){
-        if (result['imageURLs']){
-            this.setState({
-            imageURLs: result['imageURLs'],
-            });
+    chrome.storage.local.get('imageURLs', function(result){
+          if (result['imageURLs']){
+              this.setState({
+              imageURLs: result['imageURLs'],
+              });
+          } else {
+              if (localStorage.getItem("imageURLs") !== null) {
+                  let URLs = JSON.parse(localStorage.getItem("imageURLs"));
+                  this.setState({
+                      imageURLs: URLs,
+                  });
+                  chrome.storage.local.set({'imageURLs': URLs});
+
+              }
+          }
+      }.bind(this));
+    
+
+
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+      if (request.type === 'getImage') { 
+          let newURLs = this.state.imageURLs[request.cart];
+          let newTotalURLs = this.state.imageURLs
+        if (newURLs) {
+            newURLs.push(request.url);
         } else {
-            if (localStorage.getItem("imageURLs") !== null) {
-                let URLs = JSON.parse(localStorage.getItem("imageURLs"));
-                this.setState({
-                    imageURLs: URLs,
-                });
-                chrome.storage.local.set({'imageURLs': URLs});
-
-            }
+            newURLs = [request.url];
         }
-    }.bind(this));
-    
-
-
-  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.type === 'getImage') { 
-      let newURLs = this.state.imageURLs[request.cart];
-      let newTotalURLs = this.state.imageURLs
-    if (newURLs) {
-        newURLs.push(request.url);
-    } else {
-        newURLs = [request.url];
-    }
-    newTotalURLs[request.cart] = newURLs
-    this.setState({
-      imageURLs: newTotalURLs,
-      activeTab: request.cart
+        newTotalURLs[request.cart] = newURLs
+        this.setState({
+          imageURLs: newTotalURLs,
+          activeTab: request.cart
+        });
+        localStorage.setItem('imageURLs', JSON.stringify(newTotalURLs))
+        localStorage.setItem('activeTab', request.cart)
+        chrome.storage.local.set({'imageURLs': newTotalURLs})
+      } 
     });
-    localStorage.setItem('imageURLs', JSON.stringify(newTotalURLs))
-    localStorage.setItem('activeTab', request.cart)
-    chrome.storage.local.set({'imageURLs': newTotalURLs})
 
-  } 
-    
-  });
-
-
-  
-    
     if (localStorage.getItem("tabs") !== null) {
         let tabs = JSON.parse(localStorage.getItem("tabs"));
         this.setState({
@@ -94,23 +89,23 @@ class Popup extends Component {
 
     deleteImage = idx => {
 
-    let newURLs = this.state.imageURLs[this.state.activeTab];
-    newURLs.splice(idx, 1);
-    let newTotalURLs = this.state.imageURLs
-    newTotalURLs[this.state.activeTab] = newURLs
-    this.setState({
-      imageURLs: newTotalURLs,
-    });
-    localStorage.setItem("imageURLs", JSON.stringify(newTotalURLs))
-    chrome.storage.local.set({'imageURLs': newTotalURLs})
-  };
+      let newURLs = this.state.imageURLs[this.state.activeTab];
+      newURLs.splice(idx, 1);
+      let newTotalURLs = this.state.imageURLs
+      newTotalURLs[this.state.activeTab] = newURLs
+      this.setState({
+        imageURLs: newTotalURLs,
+      });
+      localStorage.setItem("imageURLs", JSON.stringify(newTotalURLs))
+      chrome.storage.local.set({'imageURLs': newTotalURLs})
+    };
 
   newTab = activeTab =>  {
-  this.setState({
-          activeTab: activeTab,
-        });
+    this.setState({
+      activeTab: activeTab,
+    });
     localStorage.setItem('activeTab', activeTab)
-  if (activeTab === "Add") {
+    if (activeTab === "Add") {
       let newTabs = [...this.state.tabs];
         newTabs.push("untitled");
         this.setState({
@@ -120,16 +115,13 @@ class Popup extends Component {
         localStorage.setItem("tabs", JSON.stringify(newTabs))
         localStorage.setItem('activeTab', newTabs[newTabs.length-1])
         this.updateMenu();
-
-    }
-
+      }
   }
 
   deleteCart = idx => {
-
-  let newTotalURLs = this.state.imageURLs
+    let newTotalURLs = this.state.imageURLs
     newTotalURLs[this.state.tabs[idx]] = undefined
-  let newTabs = [...this.state.tabs];
+    let newTabs = [...this.state.tabs];
     newTabs.splice(idx, 1);
     this.setState({
       tabs: newTabs,
@@ -144,12 +136,11 @@ class Popup extends Component {
   }
 
   changeCartName = (idx, newName) => {
-
-  let oldName = this.state.tabs[idx]
-  let newTotalURLs = this.state.imageURLs
+    let oldName = this.state.tabs[idx]
+    let newTotalURLs = this.state.imageURLs
     newTotalURLs[newName] = this.state.imageURLs[oldName]
     newTotalURLs[oldName] = undefined
-  let newTabs = [...this.state.tabs];
+    let newTabs = [...this.state.tabs];
     newTabs[idx] = newName;
     this.setState({
       tabs: newTabs,
@@ -165,27 +156,23 @@ class Popup extends Component {
   }
 
   inputName = (idx, e) => {
-  this.setState({
-    inputValue: e.target.value,
-  })
+    this.setState({
+      inputValue: e.target.value,
+    })
   }
 
   updateMenu = () => {
-
     chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
-        chrome.tabs.sendMessage(tabs[0].id, {type: 'updateMenu', menu: this.state.tabs});
+      chrome.tabs.sendMessage(tabs[0].id, {type: 'updateMenu', menu: this.state.tabs});
     })
   }
 
   viewCart = idx => {
-
-  var cart = this.state.tabs[idx]
-  var imageURLs = this.state.imageURLs[this.state.tabs[idx]]
-  chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
-        chrome.tabs.sendMessage(tabs[0].id, {type: 'viewCart', cart: cart, imageURLs : imageURLs});
-    })
-    
-
+    var cart = this.state.tabs[idx]
+    var imageURLs = this.state.imageURLs[this.state.tabs[idx]]
+    chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
+          chrome.tabs.sendMessage(tabs[0].id, {type: 'viewCart', cart: cart, imageURLs : imageURLs});
+      })
   }
 
 
@@ -199,49 +186,48 @@ class Popup extends Component {
             {this.state.tabs.map((tab, idx) => {
             if (this.state.imageURLs[tab]){
                 return (
-
-                    <Tab eventKey={tab} title={tab} key={tab}>
-                    <div className="cart">
-                        <Button size='sm' onClick={() => this.viewCart(idx)}>View</Button>
-                        <Button size='sm' onClick={() => this.deleteCart(idx)}>Delete</Button>
-                        <Button size='sm' onClick={() => this.changeCartName(idx,this.state.inputValue)}>Rename</Button>
-                        <input type="text" placeholder = "new name" value={this.state.inputValue} onChange={e => this.inputName(idx, e)} />
-                        
-                        <div className="row">
-                           <div className="column">
-                            {this.state.imageURLs[tab].map((url, idx) => {
-                                if (idx % 2 === 0) {
-                                    return (
-                                          <div key={idx}>{cartImage(url, idx, this.deleteImage)}
-                                          </div>
-                                    );
-                                } 
-                            })}
-                            </div>
-                            <div className="column">
-                            {this.state.imageURLs[tab].map((url, idx) => {
-                                if (idx % 2 === 1) {
-                                    return (
-                                          <div key={idx}>{cartImage(url, idx, this.deleteImage)}</div>
-                                    );
-                                } 
-                            })}
-                            </div>
+                <Tab eventKey={tab} title={tab} key={tab}>
+                <div className="cart">
+                    <Button size='sm' onClick={() => this.viewCart(idx)}>View</Button>
+                    <Button size='sm' onClick={() => this.deleteCart(idx)}>Delete</Button>
+                    <Button size='sm' onClick={() => this.changeCartName(idx,this.state.inputValue)}>Rename</Button>
+                    <input type="text" placeholder = "new name" value={this.state.inputValue} onChange={e => this.inputName(idx, e)} />
+                    
+                    <div className="row">
+                       <div className="column">
+                        {this.state.imageURLs[tab].map((url, idx) => {
+                            if (idx % 2 === 0) {
+                                return (
+                                <div key={idx}>{cartImage(url, idx, this.deleteImage)}
+                                </div>
+                                );
+                            } 
+                        })}
+                        </div>
+                        <div className="column">
+                        {this.state.imageURLs[tab].map((url, idx) => {
+                            if (idx % 2 === 1) {
+                                return (
+                                <div key={idx}>{cartImage(url, idx, this.deleteImage)}</div>
+                                );
+                            } 
+                        })}
                         </div>
                     </div>
-                    </Tab>
+                </div>
+                </Tab>
                 );
             } else {
-            return (
-            <Tab eventKey={tab} title={tab} key={tab}>
-            <div className="cart">
-                <Button size='sm' onClick={() => this.viewCart(idx)}>View</Button>
-                <Button size='sm' onClick={() => this.deleteCart(idx)}>Delete</Button>
-                <Button size='sm' onClick={() => this.changeCartName(idx,this.state.inputValue)}>Rename</Button>
-                <input type="text" placeholder = "new name" value={this.state.inputValue} onChange={e => this.inputName(idx, e)} />
-            </div>
-            </Tab>
-            );
+              return (
+              <Tab eventKey={tab} title={tab} key={tab}>
+              <div className="cart">
+                  <Button size='sm' onClick={() => this.viewCart(idx)}>View</Button>
+                  <Button size='sm' onClick={() => this.deleteCart(idx)}>Delete</Button>
+                  <Button size='sm' onClick={() => this.changeCartName(idx,this.state.inputValue)}>Rename</Button>
+                  <input type="text" placeholder = "new name" value={this.state.inputValue} onChange={e => this.inputName(idx, e)} />
+              </div>
+              </Tab>
+              );
             }
 
             })}
@@ -250,7 +236,6 @@ class Popup extends Component {
             </Tab>
           </Tabs>
         </div>
-        
       </div>
     );
   }
