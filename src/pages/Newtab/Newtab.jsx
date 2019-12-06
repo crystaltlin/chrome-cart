@@ -57,7 +57,7 @@ class Newtab extends Component {
     var images = [];
     if (this.state.imageURLs){
       this.state.imageURLs.map((url, idx) => {
-        images.push({src: url, thumbnail: url, thumbnailWidth: 250, thumbnailHeight : 250})
+        images.push({src: url, thumbnail: url, thumbnailWidth: 180, thumnailHeight:'auto'})
       })
     }
     return images
@@ -69,9 +69,6 @@ class Newtab extends Component {
     return (
       <div className="NewtabContainer">
         <Gallery images={this.calculateImages()}/>
-
-
-           
       </div>
     );
   }
